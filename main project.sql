@@ -17,8 +17,8 @@ create table Address
 (
 	ID int primary key auto_increment,
     UserID int,
-    HouseNo	varchar(50) not null,
-    Street varchar(50) not null,
+    HouseNo	varchar(50),
+    Street varchar(50),
     Pincode int not null,
     City varchar(50) not null,
     District varchar(50) not null,
@@ -26,24 +26,32 @@ create table Address
     CONSTRAINT Users_Address_FK FOREIGN  KEY (UserID) REFERENCES Users(ID)
 );
 
+desc address;
+
+alter table address modify Street varchar(50);
+
+
 create table UserEvent
 (
 	ID int primary key auto_increment,
     UserID int,
-    Date_time datetime,
+    Date_time datetime  DEFAULT CURRENT_TIMESTAMP,
     EventStatus varchar(50) not null,
     Severity varchar(50),
     EventDescription longtext,
     Category varchar(50) not null,
     Title text not null,
-    Upvote int not null,
-    Downvote int not null,
-    Priority varchar(50) not null,
-    isVerified varchar(50) not null,
+    Upvote int default 0,
+    Downvote int default 0,
+    isVerified boolean default False,
+    Event_time datetime,
     CONSTRAINT Users_UserEvent_FK FOREIGN  KEY (UserID) REFERENCES Users(ID)
 );
 
 
+-- alter table UserEvent modify Date_time datetime DEFAULT CURRENT_TIMESTAMP;
+alter table UserEvent drop priority;
+desc userevent;
 
 create table Location
 (
@@ -80,4 +88,6 @@ create table ImageMapping
     CONSTRAINT Images_ImageMapping_FK FOREIGN  KEY (ImageID) REFERENCES Images(ID)
 );
 
+select * from users;
+select * from address;
 

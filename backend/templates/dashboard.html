@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+    <body>
+        {{msg}}
+        <h1>Welcome to the Dashboard</h1>
+
+        <form action="/addevent" method="POST">  
+            <div class="container">   
+                <label>Title : </label>   
+                <input type="text" placeholder="Enter title" name="title" required>  
+
+                <label>Description : </label>    
+                <input type="text" placeholder="Enter description" name="desc" required>
+
+                <label>Category : </label>     
+                <input type="text" placeholder="Enter category" name="category" required>
+                
+                <label>Event_time : </label>    
+                <input type="datetime-local" placeholder="Enter Event_time" name="etime" required>
+
+                <label>Severity : </label>    
+                <input type="text" placeholder="Enter severity" name="severity" required>
+                
+                <button type="submit">Post Event</button>     
+            </div>   
+        </form>
+
+
+
+
+    </body>
+</html>

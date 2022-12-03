@@ -9,7 +9,7 @@ app = Flask(__name__)
 # Config MySQL
 app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 'Alt@mas@6980'
+app.config['MYSQL_PASSWORD'] = ''
 app.config['MYSQL_DB'] = 'thirdEyeDB'
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 # init MYSQL
@@ -24,47 +24,56 @@ mysql = MySQL(app)
 def login():
     if request.method == 'POST':
         # Get Form Fields
-        username = request.form['username']
+        email = request.form['email']
         password_candidate = request.form['password']
 
         # Create cursor
         cur = mysql.connection.cursor()
 
         # Get user by username
-        result = cur.execute("SELECT * FROM users WHERE username = %s", [username])
-
+        result = cur.execute("SELECT * FROM users WHERE email = %s", [email])
+        print("Outside if")
         if result > 0:
             # Get stored hash
             data = cur.fetchone()
-            password = data['password']
-            userid = data['id']
+            print(data)
+            password = data['UPassword']
+            userid = data['ID']
 
             # Compare Passwords
-            if sha256_crypt.verify(password_candidate, password):
+            if password_candidate == password:
                 # Passed
                 session['logged_in'] = True
-                session['username'] = username
+                session['email'] = email
                 session['userid'] = userid
 
-                flash('You are now logged in', 'success')
+                flash('You are now logged in')
+                print("Welcome")
+                return render_template('dashboard.html', msg = "")
             else:
-                error = 'Invalid login'
                 return render_template('login.html')
             # Close connection
             cur.close()
         else:
-            error = 'Username not found'
             return render_template('login.html')
 
     return render_template('login.html')
 
+@app.route('/showEventNLGU') # Show event for non logged in user
+def showEventNLGU():
+    # Create cursor
+    cur = mysql.connection.cursor()
 
+    # Execute query
+    cur.execute("Select * from UserEvent where isVerified = 0 and severity = 'High'")
+    result = cur.fetchall()
+    # Commit to DB
+    mysql.connection.commit()
 
+    # Close connection
+    cur.close()
 
-
-
-
-    
+    return render_template('home.html', msg=result)
 
 
 # User Register
@@ -92,26 +101,12 @@ def register():
         # Commit to DB
         mysql.connection.commit()
 
-        # Close connection
-        # cur.close()
-
-        # # Create cursor again
-        # cur = mysql.connection.cursor()
-
-        # Execute query
-        # userid  = cur.execute("SELECT id FROM users WHERE email = %s", [email])
-        # print(email)
-        # print(userid)
         cur.execute("INSERT INTO address(userid, houseno, street, pincode, city, district, state) VALUES(%s, %s, %s, %s, %s, %s, %s)", (cur.lastrowid, houseno, street, pincode, city, district, state))
         # Commit to DB
         mysql.connection.commit()
 
         # Close connection
         cur.close()
-
-
-
-
 
         flash('You are now registered and can log in', 'success')
 
@@ -131,6 +126,31 @@ def is_logged_in(f):
             flash('Unauthorized, Please login', 'danger')
             return redirect(url_for('login'))
     return wrap
+
+@app.route('/addevent',methods=['GET', 'POST'])
+@is_logged_in
+def addevent():
+    if request.method == 'POST':
+        severity = request.form['severity']
+        desc = request.form['desc']
+        category = request.form['category']
+        title = request.form['title']
+        etime = request.form['etime']
+
+        # Create cursor
+        cur = mysql.connection.cursor()
+
+        cur.execute("INSERT INTO UserEvent(userid, severity, eventdescription, category, title, Event_time) VALUES(%s, %s, %s, %s, %s, %s)", (session['userid'], severity, desc, category, title, etime))
+        # Commit to DB
+        mysql.connection.commit()
+
+        # Close connection
+        cur.close()
+        print("Added Event")
+        return render_template('dashboard.html', msg="Added Event")
+
+
+
 
 # Logout
 @app.route('/logout')
