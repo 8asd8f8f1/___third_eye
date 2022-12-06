@@ -36,7 +36,7 @@ create table UserEvent
 	ID int primary key auto_increment,
     UserID int,
     Date_time datetime  DEFAULT CURRENT_TIMESTAMP,
-    EventStatus varchar(50) not null,
+    EventStatus varchar(50) default 'Open',
     Severity varchar(50),
     EventDescription longtext,
     Category varchar(50) not null,
@@ -48,9 +48,8 @@ create table UserEvent
     CONSTRAINT Users_UserEvent_FK FOREIGN  KEY (UserID) REFERENCES Users(ID)
 );
 
-
--- alter table UserEvent modify Date_time datetime DEFAULT CURRENT_TIMESTAMP;
-alter table UserEvent drop priority;
+select * from userevent where Category like 'Locality%';
+select * from userevent;
 desc userevent;
 
 create table Location
@@ -91,3 +90,26 @@ create table ImageMapping
 select * from users;
 select * from address;
 
+
+
+insert into Users (UserName,Email,Phone,UPassword) values 
+('Ava','ava@gmail.com','9512436458','ava'),
+('Amelia','amelia@gmail.com','9575316458','amelia'),
+('Alexander','alexander@gmail.com','9753236458','alexander'),
+('Anthony','anthony@gmail.com','9512431569','Anthony'),
+('Emma','emma@gmail.com','8563436458','emma')
+;
+
+insert into address ( UserID ,HouseNo, Street, Pincode ,City ,District ,State ) values
+					(13,'45','','580425','Amaravati Capital City','Kurnool','Andhra Pradesh '),
+                    (14,'14','','801315','Manihari','Katihar','Bihar'),
+                    (15,'4','','802484','Ahmadabad','Ahmadabad','Gujarat'),
+                    (16,'7','','802629','Surat','Surat','Gujarat'),
+                    (17,'4','','800396','Ratia','Fatehabad','Gujarat');
+                    
+insert into UserEvent (UserID,EventStatus,Severity,EventDescription,Category,Title,event_time) values 
+('12','Null','High','Two cars heads-on collision. 3 People were injured seriously.','Accident','Car Accident','2022-12-02 17:22:00'),
+('13','Null','High','Sudden fight between two people and a man was shot in the fight. He was serioulsy injured','Crime','Gunshot by walker','2022-11-02 08:22:00'),
+('14','Null','Low','There is no proper garbage collection method. Streets are coverd in waste.','Locality Issue','Garbage Collection','2022-12-12 15:22:00'),
+('15','Open','Med','I lost my wallet which contains some amount of money and my credit card.','Missing Items','Lost Wallet','2022-12-05 09:22:00'),
+('16','Null','High','An apartment caught fire due to short circuit. There were 2 casualities and no deaths','Accident','Fire explosion in apartment','2021-11-04 20:22:00');
