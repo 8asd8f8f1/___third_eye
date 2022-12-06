@@ -1,5 +1,7 @@
-from flask import Flask, render_template, flash, redirect, url_for, session, request, logging, jsonify, make_response
+from flask import Flask, render_template, flash, redirect, url_for, session, request, logging
 from flask_mysqldb import MySQL
+from wtforms import Form, StringField, TextAreaField, PasswordField, validators
+from passlib.hash import sha256_crypt
 from functools import wraps
 
 app = Flask(__name__)
@@ -22,8 +24,8 @@ mysql = MySQL(app)
 def login():
     if request.method == 'POST':
         # Get Form Fields
-        email = request.json['email']
-        password_candidate = request.json['password']
+        email = request.form['email']
+        password_candidate = request.form['password']
 
         # Create cursor
         cur = mysql.connection.cursor()
@@ -45,81 +47,18 @@ def login():
                 session['email'] = email
                 session['userid'] = userid
 
-                data = {'message' : 'Sucess'}
-                return make_response(jsonify(data), 200)
+                flash('You are now logged in')
+                print("Welcome")
+                return render_template('dashboard.html', msg = "")
             else:
-                data = {'message':'Failed'}
-                return make_response(jsonify(data), 401)
+                return render_template('login.html')
             # Close connection
             cur.close()
         else:
-            data = {'message':'Not found'}
-            return make_response(jsonify(data), 404)
-    data = {'message':'Failed'}
-    return make_response(jsonify(data), 401)
+            return render_template('login.html')
 
+    return render_template('login.html')
 
-@app.route('/showAllEvents')
-def showAllEvents():
-    cur = mysql.connection.cursor()
-
-    # Execute query
-    cur.execute("Select * from UserEvent")
-    result = cur.fetchall()
-    # Commit to DB
-    mysql.connection.commit()
-
-    # Close connection
-    cur.close()
-    return make_response(jsonify(result),200)
-
-
-@app.route('/showEventById/<int:id>')
-def showEventById(id):
-    cur = mysql.connection.cursor()
-
-    # Execute query
-    cur.execute("Select * from UserEvent where id = %s" , [id])
-    result = cur.fetchone()
-    # Commit to DB
-    mysql.connection.commit()
-
-    # Close connection
-    cur.close()
-    return make_response(jsonify(result),200)
-
-@app.route('/showEventByLocation/data')
-def showEventByLocation(data):
-
-    lat = data['latitude'] 
-    long = data['longitude'] 
-
-    cur = mysql.connection.cursor()
-
-    # Execute query
-
-    statment = f'''
-    select * from 
-    UserEvent u join LocationMapping lm
-    on u.id = lm.eventid
-    join Location l
-    on lm.locationid = l.id
-    where latitude between '{lat-0.5}' and '{lat+0.5}' and longitude between '{long-0.5}' and '{long+0.5}'
-    '''
-
-
-    cur.execute(statment)
-    result = cur.fetcall()
-    # Commit to DB
-    mysql.connection.commit()
-
-    # Close connection
-    cur.close()
-    return make_response(jsonify(result),200)
-
-
-#filterEventByLocation
-'''
 @app.route('/showEventNLGU') # Show event for non logged in user
 def showEventNLGU():
     # Create cursor
@@ -135,35 +74,6 @@ def showEventNLGU():
     cur.close()
 
     return render_template('home.html', msg=result)
-'''
-
-#filters
-
-#filterByCategory
-# @app.route('/filterByCategory/<category>')
-# def filterByCategory(category):
-#     cur = mysql.connection.cursor()
-#     category = str(category)
-#     if category != "":
-#         q1 = f"Category = 'Locality Issue'"
-#     else:
-#         q1 = "category is not null"
-
-#     print(q1)
-#     print("hello")
-#     # Execute query
-#     statment = f"Select * from userevent where {q1}" 
-#     print(statment)
-#     cur.execute(statment)
-#     result = cur.fetchall()
-#     # Commit to DB
-#     mysql.connection.commit()
-
-#     # Close connection
-#     cur.close()
-#     print(result)
-#     return make_response(jsonify(result),200)
-
 
 
 # User Register
@@ -171,16 +81,16 @@ def showEventNLGU():
 def register():
 
     if request.method == 'POST':
-        name = request.json['username']
-        email = request.json['email']
-        phone = request.json['phone']
-        password = request.json['password']
-        houseno = request.json['houseno']
-        street = request.json['street']
-        pincode = request.json['pincode']
-        city = request.json['city']
-        district = request.json['district']
-        state = request.json['state']
+        name = request.form['username']
+        email = request.form['email']
+        phone = request.form['phone']
+        password = request.form['password']
+        houseno = request.form['houseno']
+        street = request.form['street']
+        pincode = request.form['pincode']
+        city = request.form['city']
+        district = request.form['district']
+        state = request.form['state']
 
         # Create cursor
         cur = mysql.connection.cursor()
@@ -198,11 +108,13 @@ def register():
         # Close connection
         cur.close()
 
-        data = {'message' : 'Sucess'}
-        return make_response(jsonify(data), 201)
-    
-    data = {'message':'Failed'}
-    return make_response(jsonify(data), 401)
+        flash('You are now registered and can log in', 'success')
+
+        return redirect(url_for('login'))
+    return render_template('register.html')
+
+
+
 
 
 def is_logged_in(f):
@@ -219,11 +131,11 @@ def is_logged_in(f):
 @is_logged_in
 def addevent():
     if request.method == 'POST':
-        severity = request.json['severity']
-        desc = request.json['desc']
-        category = request.json['category']
-        title = request.json['title']
-        etime = request.json['etime']
+        severity = request.form['severity']
+        desc = request.form['desc']
+        category = request.form['category']
+        title = request.form['title']
+        etime = request.form['etime']
 
         # Create cursor
         cur = mysql.connection.cursor()
@@ -234,8 +146,8 @@ def addevent():
 
         # Close connection
         cur.close()
-        data = {'message' : 'Sucess'}
-        return make_response(jsonify(data), 201)
+        print("Added Event")
+        return render_template('dashboard.html', msg="Added Event")
 
 
 
