@@ -1,13 +1,30 @@
 from flask import Flask, render_template, flash, redirect, url_for, session, request, logging, jsonify, make_response
 from flask_mysqldb import MySQL
 from functools import wraps
+from flask_cors import CORS
+from datetime import datetime, date
+from flask.json import JSONEncoder
+
+class CustomJSONEncoder(JSONEncoder):
+    def default(self, obj):
+        try:
+            if isinstance(obj, date):
+                return obj.isoformat()
+            iterable = iter(obj)
+        except TypeError:
+            pass
+        else:
+            return list(iterable)
+        return JSONEncoder.default(self, obj)
 
 app = Flask(__name__)
+app.json_encoder = CustomJSONEncoder
+CORS(app)
 
 # Config MySQL
 app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = ''
+app.config['MYSQL_PASSWORD'] = 'password'
 app.config['MYSQL_DB'] = 'thirdEyeDB'
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 # init MYSQL
@@ -59,22 +76,24 @@ def login():
     return make_response(jsonify(data), 401)
 
 
-@app.route('/showAllEvents')
+@app.route('/events')
 def showAllEvents():
     cur = mysql.connection.cursor()
 
     # Execute query
-    cur.execute("Select * from UserEvent")
+    cur.execute("Select ue.*, u.UserName from UserEvent ue, Users u Where u.ID = ue.UserID")
     result = cur.fetchall()
     # Commit to DB
     mysql.connection.commit()
+
+    print(result)
 
     # Close connection
     cur.close()
     return make_response(jsonify(result),200)
 
 
-@app.route('/showEventById/<int:id>')
+@app.route('/event/<int:id>')
 def showEventById(id):
     cur = mysql.connection.cursor()
 
