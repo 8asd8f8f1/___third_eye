@@ -9,7 +9,7 @@ const render = (status: Status) => {
     return <h1>{status}</h1>;
 };
 
-const MyMapComponent: React.FC<{
+export const MyMapComponent: React.FC<{
     center: google.maps.LatLngLiteral;
     zoom: number;
 }> = ({ center, zoom }) => {
@@ -17,12 +17,12 @@ const MyMapComponent: React.FC<{
 
     React.useEffect(() => {
         new window.google.maps.Map(ref.current!, {
-            center,
-            zoom,
+            center: { lat: 10, lng: 10 },
+            zoom: 11,
         });
     });
 
-    return <div ref={ref} id='map' />;
+    return <div ref={ref} id='map' style={{ height: "100vh" }} />;
 };
 
 const MapApp = () => (
@@ -231,26 +231,6 @@ const areMapsEqual: TypeEqualityComparator<google.maps.LatLng, undefined> = (
 const deepCompareEqualsForMaps = createCustomEqual(deepEqual => ({
     areMapsEqual,
 }));
-
-// const deepCompareEqualsForMaps = createCustomEqual(
-//     deepEqual => (a: google.maps.LatLng, b: google.maps.LatLng) => {
-//         if (
-//             isLatLngLiteral(a) ||
-//             a instanceof google.maps.LatLng ||
-//             isLatLngLiteral(b) ||
-//             b instanceof google.maps.LatLng
-//         ) {
-//             return new google.maps.LatLng(a).equals(new google.maps.LatLng(b));
-//         }
-
-//         // TODO extend to other types
-
-//         // use fast-equals for other objects
-//         return deepEqual(a, b);
-//     }
-// );
-
-// const deepCompareEqualsForMaps = createCustomEqual( getComparatorOptions: );
 
 function useDeepCompareMemoize(value: any) {
     const ref = React.useRef();
