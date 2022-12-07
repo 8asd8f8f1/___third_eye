@@ -16,7 +16,7 @@ import {
 import axios from "axios";
 import Navbar from "./Navbar";
 
-import { EventClass } from "./types";
+import { EventClass, Helper } from "./types";
 
 const queryClient = new QueryClient();
 
@@ -28,58 +28,78 @@ const Events: React.FC = () => {
     );
 };
 
-// class Event {
-//     Category: string = "";
-//     Date_time: Date = new Date();
-//     Downvote: number = 0;
-//     EventDescription: string = "";
-//     EventStatus: string = "";
-//     Event_time: Date = new Date();
-//     ID: number = 0;
-//     Severity: string = "";
-//     Title: string = "";
-//     Upvote: number = 0;
-//     UserID: number = 0;
-//     UserName: string = "";
-//     isVerified: number = 0;
-// }
+const EventSeverity: React.FC<{ severity: string }> = ({ severity }) => {
+    let severityStyle: string;
+    switch (severity) {
+        case "Low":
+            severityStyle = "text-yellow-500";
+            break;
+        case "Med":
+            severityStyle = "text-orange-500";
+            break;
+        default:
+            severityStyle = "text-red-500";
+            break;
+    }
+
+    return (
+        <p
+            className={`${severityStyle} drop-shadow-xl text-white grid-center rounded-[6px] text-xs font-bold capitalize`}
+        >
+            {severity} Severity
+        </p>
+    );
+};
+
+const EventCategory: React.FC<{ category: string }> = ({ category }) => {
+    return (
+        <p className='text-xs font-semibold text-blue-600 border-blue-600 border-[1px] px-2 rounded-full'>
+            {category}
+        </p>
+    );
+};
+
+const EventUserTS: React.FC<{ username: string; datetime: Date }> = ({
+    username,
+    datetime,
+}) => {
+    const locale = "en-IN";
+    const formatOBJ: Intl.DateTimeFormatOptions = {
+        day: "2-digit",
+        month: "short",
+        year: "2-digit",
+    };
+
+    const datetimeFormatted = new Date(datetime).toLocaleString(
+        locale,
+        formatOBJ
+    );
+
+    return (
+        <div className='flex items-center mt-2'>
+            <p className='text-sm font-semibold text-gray-500'>
+                {`${username} on ${datetime}`}
+            </p>
+        </div>
+    );
+};
 
 const EventComponent: React.FC<{ event: EventClass }> = ({ event }) => {
     return (
-        <div className='flex flex-col border-[1px] border-gray-500 rounded-xl p-4 w-[50%]'>
+        <div className='flex flex-col border-[1px] border-gray-500 rounded-2xl shadow-xl p-4 w-[50%]'>
             <div className='flex flex-row items-center'>
                 <Link to={`/event/${event.ID}`}>
                     <p className='text-xl font-bold'>{event.Title}</p>
                 </Link>
             </div>
-            <div className='flex flex-row items-center mb-3 gap-2'>
-                <p
-                    className={`${
-                        event.Severity === "High"
-                            ? "bg-red-500"
-                            : event.Severity === "Med"
-                            ? "bg-orange-500"
-                            : "bg-yellow-400"
-                    } text-white grid-center p-1 rounded-[6px] text-xs font-bold capitalize`}
-                >
-                    {event.Severity}
-                </p>
-                <p className='text-xs font-semibold text-white bg-blue-700 px-3 py-1 rounded-full'>
-                    {event.Category}
-                </p>
+            <div className='flex flex-row gap-3 items-start mb-3 '>
+                <EventCategory category={event.Category} />
+                <EventSeverity severity={event.Severity} />
             </div>
-            <p className='text-sm'>{event.EventDescription}</p>
-            <div className='flex items-center mt-2'>
-                <p className='text-sm font-semibold text-gray-500'>
-                    {`${event.UserName} on ${new Date(
-                        event.Date_time
-                    ).toLocaleString("en-IN", {
-                        day: "2-digit",
-                        month: "short",
-                        year: "2-digit",
-                    })}`}
-                </p>
-            </div>
+            {/* <p className='text-sm text-ellipsis overflow-x-hidden overflow-y-hidden min-h-[30px] max-h-[80px] align-top'>
+                {event.EventDescription.slice(0, 100)}...
+            </p> */}
+            <EventUserTS username={event.UserName} datetime={event.Date_time} />
             <div className='flex items-center gap-3 mt-2'>
                 <div className='flex items-center gap-1'>
                     <FaArrowUp className='text-green-600 text-sm' />
@@ -106,7 +126,7 @@ const EventsComponent: React.FC = () => {
         queryFn: () =>
             axios
                 .get(`${import.meta.env.VITE_FLASK_BACKEND}/events`)
-                .then(res => res.data),
+                .then(res => res.data as [EventClass]),
     });
 
     return (

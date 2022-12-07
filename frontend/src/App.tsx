@@ -1,6 +1,4 @@
 import React, { ReactElement, useState } from "react";
-import reactLogo from "./assets/react.svg";
-import axios from "axios";
 import Map from "./components/HMap";
 import Events from "./components/Events";
 

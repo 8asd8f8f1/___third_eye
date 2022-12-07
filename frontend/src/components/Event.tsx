@@ -11,7 +11,7 @@ import { BiUpvote, BiDownvote } from "react-icons/bi";
 import { Link, useLoaderData } from "react-router-dom";
 import Map from "./Map";
 import Navbar from "./Navbar";
-import { EventClass } from "./types";
+import { EventClass, Comment } from "./types";
 import axios from "axios";
 
 const TitleBar = () => (
@@ -35,10 +35,7 @@ const EventInfo: React.FC<{ event: EventClass }> = ({ event }) => {
     return (
         <div className='bg-slate-100 rounded-[12px] p-5 w-full'>
             <div className='flex items-center gap-2'>
-                <p className='text-xl font-bold'>
-                    {/* Car Crash at toll booth #8 on NH-42 */}
-                    {event.Title}
-                </p>
+                <p className='text-xl font-bold'>{event.Title}</p>
                 <div className='flex flex-row items-center gap-2'>
                     <p
                         className={`${
@@ -75,13 +72,6 @@ const EventInfo: React.FC<{ event: EventClass }> = ({ event }) => {
         </div>
     );
 };
-
-class Comment {
-    userName: string = "";
-    comment: string = "";
-    upvotes: number = 0;
-    downvotes: number = 0;
-}
 
 const EventComment: React.FC<{ data: Comment }> = ({ data }) => {
     const [currentTime, setCurrentTime] = React.useState(new Date());

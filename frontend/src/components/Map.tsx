@@ -10,24 +10,50 @@ const render = (status: Status) => {
     return <h1>{status}</h1>;
 };
 
+type Location = {
+    lat: number;
+    lng: number;
+};
+
 export const MyMapComponent: React.FC<{
     center: google.maps.LatLngLiteral;
     zoom: number;
 }> = ({ center, zoom }) => {
     const ref = React.useRef<HTMLDivElement>(null);
-
-    React.useEffect(() => {
-        new window.google.maps.Map(ref.current!, {
-            center: { lat: 10, lng: 10 },
-            zoom: 11,
-        });
+    const [Location, setLocation] = React.useState<Location>({
+        lat: 28,
+        lng: 77,
     });
 
-    return <div ref={ref} id='map' style={{ height: "100vh" }} />;
+    React.useEffect(() => {
+        navigator.geolocation.getCurrentPosition(
+            position => {
+                // console.log("got Position");
+
+                setLocation({
+                    lat: position.coords.latitude,
+                    lng: position.coords.longitude,
+                });
+            },
+            error => {
+                console.error(error);
+            }
+        );
+
+        new window.google.maps.Map(ref.current!, {
+            center: Location,
+            zoom: 18,
+            controlSize: 20,
+        });
+    }, []);
+
+    return (
+        <div ref={ref} id='map' style={{ width: "800px", height: "800px" }} />
+    );
 };
 
 const MapApp = () => (
-    <div className='overflow-hidden'>
+    <div className='flex flex-col items-center m-auto w-[100px] sm:w-[580px] md:w[730px] lg:w-[970px] xl:w-[80%]'>
         <Navbar />
         <Wrapper
             apiKey='AIzaSyDyDAT6yUSuV-SybyKyaLtgd-tfPHNJle0'
