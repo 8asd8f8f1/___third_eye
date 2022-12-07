@@ -3,13 +3,12 @@ create database thirdEyeDB;
 
 use thirdEyeDB;
 
-create table Users
-(
-	ID int primary key auto_increment,
-    UserName varchar(50) not null,
-    Email varchar(50) unique not null,
-    Phone bigint unique not null,
-    UPassword varchar(50) not null
+CREATE TABLE Users (
+    ID INT PRIMARY KEY AUTO_INCREMENT,
+    UserName VARCHAR(50) NOT NULL,
+    Email VARCHAR(50) UNIQUE NOT NULL,
+    Phone BIGINT UNIQUE NOT NULL,
+    UPassword VARCHAR(50) NOT NULL
 );
 
 -- alter table users modify phone bigint;
@@ -29,17 +28,17 @@ insert into Users (UserName,Email,Phone,UPassword) values
 -- select * from Address;
 -- select * from UserEvent;
 
-create table Address
-(
-	ID int primary key auto_increment,
-    UserID int,
-    HouseNo	varchar(50),
-    Street varchar(50),
-    Pincode int not null,
-    City varchar(50) not null,
-    District varchar(50) not null,
-    State varchar(50) not null,
-    CONSTRAINT Users_Address_FK FOREIGN  KEY (UserID) REFERENCES Users(ID)
+CREATE TABLE Address (
+    ID INT PRIMARY KEY AUTO_INCREMENT,
+    UserID INT,
+    HouseNo VARCHAR(50),
+    Street VARCHAR(50),
+    Pincode INT NOT NULL,
+    City VARCHAR(50) NOT NULL,
+    District VARCHAR(50) NOT NULL,
+    State VARCHAR(50) NOT NULL,
+    CONSTRAINT Users_Address_FK FOREIGN KEY (UserID)
+        REFERENCES Users (ID)
 );
 -- --------------- ---1---------2-------3-------4-------5------6--------7----
 insert into address ( UserID ,HouseNo, Street, Pincode ,City ,District ,State ) values
@@ -418,13 +417,14 @@ create table Location
     Longitude point not null
 );
 
-create table LocationMapping
-(
-	LocationID int,
-    EventID int,
-    UserID int,
-    CONSTRAINT UserEvent_LocationMapping_FK FOREIGN  KEY (EventID) REFERENCES UserEvent(ID),
-    CONSTRAINT Location_LocationMapping_FK FOREIGN  KEY (LocationID) REFERENCES Location(ID)
+CREATE TABLE LocationMapping (
+    LocationID INT,
+    EventID INT,
+    UserID INT,
+    CONSTRAINT UserEvent_LocationMapping_FK FOREIGN KEY (EventID)
+        REFERENCES UserEvent (ID),
+    CONSTRAINT Location_LocationMapping_FK FOREIGN KEY (LocationID)
+        REFERENCES Location (ID)
 );
 
 -- alter table locationmapping drop constraint Users_LocationMapping_FK;

@@ -21,11 +21,13 @@ class CustomJSONEncoder(JSONEncoder):
 app = Flask(__name__)
 app.json_encoder = CustomJSONEncoder
 CORS(app)
+app.json_encoder = CustomJSONEncoder
+CORS(app)
 
 # Config MySQL
 app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 'Alt@mas@6980'
+app.config['MYSQL_PASSWORD'] = ''
 app.config['MYSQL_DB'] = 'thirdEyeDB'
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 # init MYSQL
@@ -82,6 +84,7 @@ def login():
 
 
 @app.route('/events')
+@app.route('/events')
 def showAllEvents():
     cur = mysql.connection.cursor()
 
@@ -90,6 +93,8 @@ def showAllEvents():
     result = cur.fetchall()
     # Commit to DB
     mysql.connection.commit()
+
+    print(result)
 
     # Close connection
     cur.close()
