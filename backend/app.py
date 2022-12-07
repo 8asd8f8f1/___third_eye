@@ -21,8 +21,7 @@ class CustomJSONEncoder(JSONEncoder):
 app = Flask(__name__)
 app.json_encoder = CustomJSONEncoder
 CORS(app)
-app.json_encoder = CustomJSONEncoder
-CORS(app)
+
 
 # Config MySQL
 app.config['MYSQL_HOST'] = 'localhost'
