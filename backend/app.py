@@ -1,40 +1,56 @@
 from flask import Flask, render_template, flash, redirect, url_for, session, request, logging, jsonify, make_response
 from flask_mysqldb import MySQL
 from functools import wraps
+from flask_cors import CORS
+from datetime import datetime, date
+from flask.json import JSONEncoder
+import jwt
+
+class CustomJSONEncoder(JSONEncoder):
+    def default(self, obj):
+        try:
+            if isinstance(obj, date):
+                return obj.isoformat()
+            iterable = iter(obj)
+        except TypeError:
+            pass
+        else:
+            return list(iterable)
+        return JSONEncoder.default(self, obj)
 
 app = Flask(__name__)
+app.json_encoder = CustomJSONEncoder
+CORS(app)
 
 # Config MySQL
 app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = ''
+app.config['MYSQL_PASSWORD'] = 'Alt@mas@6980'
 app.config['MYSQL_DB'] = 'thirdEyeDB'
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 # init MYSQL
 mysql = MySQL(app)
 
 
-
-
 @app.route('/')
 # User login
-@app.route('/login', methods=['GET', 'POST'])
+@app.route('/login', methods=['POST'])
 def login():
     if request.method == 'POST':
         # Get Form Fields
-        email = request.json['email']
-        password_candidate = request.json['password']
+        request_json= request.get_json()
+
+        email = request_json['email']
+        password_candidate = request_json['password']
 
         # Create cursor
         cur = mysql.connection.cursor()
 
         # Get user by username
         result = cur.execute("SELECT * FROM users WHERE email = %s", [email])
-        print("Outside if")
         if result > 0:
             # Get stored hash
             data = cur.fetchone()
-            print(data)
             password = data['UPassword']
             userid = data['ID']
 
@@ -45,7 +61,15 @@ def login():
                 session['email'] = email
                 session['userid'] = userid
 
-                data = {'message' : 'Sucess'}
+                details = {'email': email,'userid': userid}
+                token = jwt.encode(details, app.secret_key, algorithm="HS256")
+                session['token'] = token
+
+                data = {
+                    'message' : 'Sucessfully logged in',
+                    'auth-token': token
+                    }
+
                 return make_response(jsonify(data), 200)
             else:
                 data = {'message':'Failed'}
@@ -55,16 +79,14 @@ def login():
         else:
             data = {'message':'Not found'}
             return make_response(jsonify(data), 404)
-    data = {'message':'Failed'}
-    return make_response(jsonify(data), 401)
 
 
-@app.route('/showAllEvents')
+@app.route('/events')
 def showAllEvents():
     cur = mysql.connection.cursor()
 
     # Execute query
-    cur.execute("Select * from UserEvent")
+    cur.execute("Select ue.*, u.UserName from UserEvent ue, Users u Where u.ID = ue.UserID")
     result = cur.fetchall()
     # Commit to DB
     mysql.connection.commit()
@@ -74,12 +96,12 @@ def showAllEvents():
     return make_response(jsonify(result),200)
 
 
-@app.route('/showEventById/<int:id>')
+@app.route('/event/<int:id>')
 def showEventById(id):
     cur = mysql.connection.cursor()
 
     # Execute query
-    cur.execute("Select * from UserEvent where id = %s" , [id])
+    cur.execute("Select ue.*, u.UserName from UserEvent ue, Users u Where u.ID = ue.UserID and ue.ID = %s" , [id])
     result = cur.fetchone()
     # Commit to DB
     mysql.connection.commit()
@@ -88,142 +110,115 @@ def showEventById(id):
     cur.close()
     return make_response(jsonify(result),200)
 
-@app.route('/showEventByLocation/data')
-def showEventByLocation(data):
-
-    lat = data['latitude'] 
-    long = data['longitude'] 
-
-    cur = mysql.connection.cursor()
-
-    # Execute query
-
-    statment = f'''
-    select * from 
-    UserEvent u join LocationMapping lm
-    on u.id = lm.eventid
-    join Location l
-    on lm.locationid = l.id
-    where latitude between '{lat-0.5}' and '{lat+0.5}' and longitude between '{long-0.5}' and '{long+0.5}'
-    '''
-
-
-    cur.execute(statment)
-    result = cur.fetcall()
-    # Commit to DB
-    mysql.connection.commit()
-
-    # Close connection
-    cur.close()
-    return make_response(jsonify(result),200)
-
-
-#filterEventByLocation
-'''
-@app.route('/showEventNLGU') # Show event for non logged in user
-def showEventNLGU():
-    # Create cursor
-    cur = mysql.connection.cursor()
-
-    # Execute query
-    cur.execute("Select * from UserEvent where isVerified = 0 and severity = 'High'")
-    result = cur.fetchall()
-    # Commit to DB
-    mysql.connection.commit()
-
-    # Close connection
-    cur.close()
-
-    return render_template('home.html', msg=result)
-'''
-
-#filters
-
-#filterByCategory
-# @app.route('/filterByCategory/<category>')
-# def filterByCategory(category):
-#     cur = mysql.connection.cursor()
-#     category = str(category)
-#     if category != "":
-#         q1 = f"Category = 'Locality Issue'"
-#     else:
-#         q1 = "category is not null"
-
-#     print(q1)
-#     print("hello")
-#     # Execute query
-#     statment = f"Select * from userevent where {q1}" 
-#     print(statment)
-#     cur.execute(statment)
-#     result = cur.fetchall()
-#     # Commit to DB
-#     mysql.connection.commit()
-
-#     # Close connection
-#     cur.close()
-#     print(result)
-#     return make_response(jsonify(result),200)
-
-
-
-# User Register
-@app.route('/register', methods=['GET', 'POST'])
-def register():
-
+@app.route('/showEventByLocation', methods=['POST'])
+def showEventByLocation():
     if request.method == 'POST':
-        name = request.json['username']
-        email = request.json['email']
-        phone = request.json['phone']
-        password = request.json['password']
-        houseno = request.json['houseno']
-        street = request.json['street']
-        pincode = request.json['pincode']
-        city = request.json['city']
-        district = request.json['district']
-        state = request.json['state']
+        request_json = request.get_json()
+        lat = request_json['latitude'] 
+        long = request_json['longitude'] 
 
-        # Create cursor
         cur = mysql.connection.cursor()
 
         # Execute query
-        cur.execute("INSERT INTO users(username, email, phone, upassword) VALUES(%s, %s, %s, %s)", (name, email, phone, password))
-        
-        # Commit to DB
-        mysql.connection.commit()
 
-        cur.execute("INSERT INTO address(userid, houseno, street, pincode, city, district, state) VALUES(%s, %s, %s, %s, %s, %s, %s)", (cur.lastrowid, houseno, street, pincode, city, district, state))
+        statement = f'''
+        select * from 
+        UserEvent where 
+        Latitude between '{lat-0.5}' and '{lat+0.5}' 
+        and 
+        Longitude between '{long-0.5}' and '{long+0.5}'
+        '''
+
+        cur.execute(statement)
+        result = cur.fetchall()
         # Commit to DB
         mysql.connection.commit()
 
         # Close connection
         cur.close()
+        return make_response(jsonify(result),200)
 
-        data = {'message' : 'Sucess'}
-        return make_response(jsonify(data), 201)
-    
-    data = {'message':'Failed'}
-    return make_response(jsonify(data), 401)
+
+
+# User Register
+@app.route('/register', methods=['POST'])
+def register():
+    if request.method == 'POST':
+        request_json = request.get_json()
+
+        name = request_json['username']
+        email = request_json['email']
+        phone = request_json['phone']
+        password = request_json['password']
+        houseno = request_json['houseno']
+        street = request_json['street']
+        pincode = request_json['pincode']
+        city = request_json['city']
+        district = request_json['district']
+        state = request_json['state']
+
+        # Create cursor
+        cur = mysql.connection.cursor()
+
+        result = cur.execute("SELECT * FROM users WHERE email = %s", [email])
+        if result > 0:
+            # Close connection
+            cur.close()
+
+            data = { 'message': 'User already exists. Please log in'} 
+
+            return make_response(jsonify(data), 400)
+
+        else:
+            # Execute query
+            cur.execute("INSERT INTO users(username, email, phone, upassword) VALUES(%s, %s, %s, %s)", (name, email, phone, password))
+            
+            # Commit to DB
+            mysql.connection.commit()
+            userid = cur.lastrowid
+            cur.execute("INSERT INTO address(userid, houseno, street, pincode, city, district, state) VALUES(%s, %s, %s, %s, %s, %s, %s)", (userid, houseno, street, pincode, city, district, state))
+            # Commit to DB
+            mysql.connection.commit()
+
+            session['logged_in'] = True
+            session['email'] = email
+            session['userid'] = userid
+
+            details = {'email': email,'userid': userid}
+            token = jwt.encode(details, app.secret_key, algorithm="HS256")
+            session['token'] = token
+            data = {
+                'message' : 'Sucessfully logged in',
+                'auth-token': token
+                }
+            
+            # Close connection
+            cur.close()
+            return make_response(jsonify(data), 200)
+
 
 
 def is_logged_in(f):
     @wraps(f)
     def wrap(*args, **kwargs):
-        if 'logged_in' in session:
+        if 'logged_in' in session and jwt.decode(session['token'],app.secret_key, algorithms=["HS256"])['email'] == session['email']:
             return f(*args, **kwargs)
         else:
-            flash('Unauthorized, Please login', 'danger')
-            return redirect(url_for('login'))
+            data = { 'message': 'Unauthorized. Please log in!'}
+            return make_response(jsonify(data),200)
     return wrap
 
-@app.route('/addevent',methods=['GET', 'POST'])
+@app.route('/addevent',methods=['POST'])
 @is_logged_in
 def addevent():
     if request.method == 'POST':
-        severity = request.json['severity']
-        desc = request.json['desc']
-        category = request.json['category']
-        title = request.json['title']
-        etime = request.json['etime']
+        request_json = request.get_json()
+
+        severity = request_json['severity']
+        desc = request_json['desc']
+        category = request_json['category']
+        title = request_json['title']
+        etime = request_json['etime']
 
         # Create cursor
         cur = mysql.connection.cursor()
@@ -237,6 +232,89 @@ def addevent():
         data = {'message' : 'Sucess'}
         return make_response(jsonify(data), 201)
 
+@app.route('/upvoteById/<int:id>')
+@is_logged_in
+def upvoteById(id):
+    cur = mysql.connection.cursor()
+
+    # Execute query
+    cur.execute("update UserEvent set Upvote=Upvote+1 where id = %s",[id])
+
+    # Commit to DB
+    mysql.connection.commit()
+
+    # Close connection
+    cur.close()
+    result = {'message':'Success'}
+    return make_response(jsonify(result),200)
+
+@app.route('/downvoteById/<int:id>')
+@is_logged_in
+def downvoteById(id):
+    cur = mysql.connection.cursor()
+
+    # Execute query
+    cur.execute("update UserEvent set Downvote=Downvote+1 where id = %s",[id])
+
+    # Commit to DB
+    mysql.connection.commit()
+
+    # Close connection
+    cur.close()
+    result = {'message':'Success'}
+    return make_response(jsonify(result),200)
+
+
+@app.route('/editEvent',methods=['POST'])
+@is_logged_in
+def editEvent():
+    if request.method == 'POST':
+        request_json = request.get_json()
+
+        uid = request_json['userid']
+        id = request_json['id']
+        status = request_json['status']
+        severity = request_json['severity']
+        desc = request_json['desc']
+        category = request_json['category']
+        title = request_json['title']
+        etime = request_json['etime']
+
+        if uid == session['userid']:
+            try:
+                cur = mysql.connection.cursor()
+
+                # Execute query
+                statement = f'''
+                            update UserEvent set Title = '{title}', EventDescription = '{desc}', 
+                            Category = '{category}', Severity = '{severity}', EventStatus = '{status}',
+                            Event_time = '{etime}' where ID = {id} and UserID = {uid};
+                            '''
+
+                cur.execute(statement)
+
+                # Commit to DB
+                mysql.connection.commit()
+
+                if cur.rowcount:
+                    # Close connection
+                    cur.close()
+                    result = {'message':'Success'}
+                    return make_response(jsonify(result),200)
+                else:
+                    cur.close()
+                    result = {'message':'Sorry! You are not allowed to update this event.1'}
+                    return make_response(jsonify(result),401)
+                
+            except Exception as e:
+                result = {'message':'Failed'}
+                return make_response(jsonify(result),401)
+
+        else:
+            result = {'message':'Sorry! You are not allowed to update this event.'}
+            return make_response(jsonify(result),401)
+
+
 
 
 
@@ -245,8 +323,8 @@ def addevent():
 @is_logged_in
 def logout():
     session.clear()
-    flash('You are now logged out', 'success')
-    return redirect(url_for('login'))
+    data = { 'message': 'You are now logged out'}
+    return make_response(jsonify(data),200)
 
 # Dashboard
 # @app.route('/dashboard')
