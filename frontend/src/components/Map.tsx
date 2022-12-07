@@ -4,6 +4,7 @@ import { Wrapper, Status } from "@googlemaps/react-wrapper";
 import { createCustomEqual, deepEqual } from "fast-equals";
 import type { TypeEqualityComparator, EqualityComparator } from "fast-equals";
 import { isLatLngLiteral } from "@googlemaps/typescript-guards";
+import Navbar from "./Navbar";
 
 const render = (status: Status) => {
     return <h1>{status}</h1>;
@@ -26,9 +27,15 @@ export const MyMapComponent: React.FC<{
 };
 
 const MapApp = () => (
-    <Wrapper apiKey='AIzaSyDyDAT6yUSuV-SybyKyaLtgd-tfPHNJle0' render={render}>
-        <MyMapComponent center={{ lat: -34, lng: 150 }} zoom={6} />
-    </Wrapper>
+    <div className='overflow-hidden'>
+        <Navbar />
+        <Wrapper
+            apiKey='AIzaSyDyDAT6yUSuV-SybyKyaLtgd-tfPHNJle0'
+            render={render}
+        >
+            <MyMapComponent center={{ lat: -34, lng: 150 }} zoom={6} />
+        </Wrapper>
+    </div>
 );
 
 const MapAp: React.FC = () => {

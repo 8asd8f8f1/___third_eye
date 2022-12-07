@@ -1,5 +1,7 @@
 import React from "react";
 
+import { Link } from "react-router-dom";
+
 import {
     FaArrowLeft,
     FaMapMarkerAlt,
@@ -14,7 +16,10 @@ import {
     QueryClientProvider,
     useQueryClient,
 } from "@tanstack/react-query";
+
 import axios from "axios";
+
+import Navbar from "./Navbar";
 
 const queryClient = new QueryClient();
 
@@ -46,8 +51,9 @@ const EventComponent: React.FC<{ event: Event }> = ({ event }) => {
     return (
         <div className='flex flex-col border-[1px] border-gray-500 rounded-xl p-4 w-[50%]'>
             <div className='flex flex-row items-center'>
-                <p className='text-xl font-bold'>{event.Title}</p>
-                {/* <p className='text-sm'>{event.Severity}</p> */}
+                <Link to={`/event/${event.ID}`}>
+                    <p className='text-xl font-bold'>{event.Title}</p>
+                </Link>
             </div>
             <div className='flex flex-row items-center mb-3 gap-2'>
                 <p
@@ -61,7 +67,7 @@ const EventComponent: React.FC<{ event: Event }> = ({ event }) => {
                 >
                     {event.Severity}
                 </p>
-                <p className='text-xs font-semibold bg-blue-700 px-3 py-1 rounded-full'>
+                <p className='text-xs font-semibold text-white bg-blue-700 px-3 py-1 rounded-full'>
                     {event.Category}
                 </p>
             </div>
@@ -96,19 +102,6 @@ const EventComponent: React.FC<{ event: Event }> = ({ event }) => {
     );
 };
 
-const Header: React.FC = () => {
-    return (
-        <div className='flex items-center justify-between w-full mt-6 mb-5'>
-            <p className='text-4xl font-extrabold'>Third Eye</p>
-            <div className='flex items-center font-semibold gap-5 sm:gap-16 lg:gap-32 xl:gap-40 xl:text-xl'>
-                <p>Home</p>
-                <p>Events</p>
-                <p>Logout</p>
-            </div>
-        </div>
-    );
-};
-
 const EventsComponent: React.FC = () => {
     const queryClient = useQueryClient();
 
@@ -122,7 +115,7 @@ const EventsComponent: React.FC = () => {
 
     return (
         <div className='m-auto flex flex-col gap-5 w-[400px] sm:w-[500px] lg:w-[80%] xl:w-[60%] items-center'>
-            <Header />
+            <Navbar />
             {eventsQuery.isError
                 ? "Error!!!"
                 : eventsQuery.isLoading

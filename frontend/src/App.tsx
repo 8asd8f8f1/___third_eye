@@ -12,10 +12,10 @@ import { createBrowserRouter, RouterProvider, Route } from "react-router-dom";
 const router = createBrowserRouter([
     {
         path: "/",
-        element: <Map />,
+        element: <MapApp />,
     },
     {
-        path: "/event",
+        path: "/event/:EventID",
         element: <Event />,
     },
     {

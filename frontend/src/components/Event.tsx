@@ -8,11 +8,14 @@ import {
 } from "react-icons/fa";
 import { RiMapPinLine } from "react-icons/ri";
 import { BiUpvote, BiDownvote } from "react-icons/bi";
+import { Link } from "react-router-dom";
 import Map from "./Map";
 
 const TitleBar = () => (
     <div className='flex items-center gap-4 w-full pt-5 pb-2 '>
-        <FaArrowLeft className='text-2xl' />
+        <Link to={"/events"}>
+            <FaArrowLeft className='text-2xl' />
+        </Link>
         <div className='text-3xl font-bold'>Event Info</div>
     </div>
 );
