@@ -12,6 +12,8 @@ export class EventClass {
     UserID: number = 0;
     UserName: string = "";
     isVerified: number = 0;
+    Latitude: number = 0;
+    Longitude: number = 0;
 }
 
 export class Comment {
@@ -36,4 +38,9 @@ export class Helper {
 
         return value;
     }
+}
+
+export class LocationClass {
+    lat: number = 0.0;
+    lng: number = 0.0;
 }

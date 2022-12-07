@@ -6,57 +6,66 @@ import type { TypeEqualityComparator, EqualityComparator } from "fast-equals";
 import { isLatLngLiteral } from "@googlemaps/typescript-guards";
 import Navbar from "./Navbar";
 
+import { LocationClass } from "./types";
+
 const render = (status: Status) => {
     return <h1>{status}</h1>;
 };
 
-type Location = {
-    lat: number;
-    lng: number;
+export const GetCurrentLocation = (): LocationClass => {
+    let currentLocation: LocationClass = new LocationClass();
+    navigator.geolocation.getCurrentPosition(
+        position => {
+            currentLocation = {
+                lat: position.coords.latitude,
+                lng: position.coords.longitude,
+            };
+        },
+        error => {
+            console.error(error);
+        }
+    );
+
+    return currentLocation;
 };
 
 export const MyMapComponent: React.FC<{
-    center: google.maps.LatLngLiteral;
+    center: LocationClass;
     zoom: number;
 }> = ({ center, zoom }) => {
     const ref = React.useRef<HTMLDivElement>(null);
-    const [Location, setLocation] = React.useState<Location>({
-        lat: 28,
-        lng: 77,
-    });
+    const [Location, setLocation] = React.useState<LocationClass>(center);
 
     React.useEffect(() => {
-        navigator.geolocation.getCurrentPosition(
-            position => {
-                // console.log("got Position");
-
-                setLocation({
-                    lat: position.coords.latitude,
-                    lng: position.coords.longitude,
-                });
-            },
-            error => {
-                console.error(error);
-            }
-        );
+        // navigator.geolocation.getCurrentPosition(
+        //     position => {
+        //         console.log(position);
+        //         setLocation({
+        //             lat: position.coords.latitude,
+        //             lng: position.coords.longitude,
+        //         });
+        //     },
+        //     error => {
+        //         console.error(error);
+        //     }
+        // );
 
         new window.google.maps.Map(ref.current!, {
             center: Location,
-            zoom: 18,
+            zoom: zoom,
             controlSize: 20,
         });
     }, []);
 
     return (
-        <div ref={ref} id='map' style={{ width: "800px", height: "800px" }} />
+        <div ref={ref} id='map' style={{ width: "600px", height: "600px" }} />
     );
 };
 
-const MapApp = () => (
+const MapApp: React.FC = () => (
     <div className='flex flex-col items-center m-auto w-[100px] sm:w-[580px] md:w[730px] lg:w-[970px] xl:w-[80%]'>
-        <Navbar />
         <Wrapper
-            apiKey='AIzaSyDyDAT6yUSuV-SybyKyaLtgd-tfPHNJle0'
+            apiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}
             render={render}
         >
             <MyMapComponent center={{ lat: -34, lng: 150 }} zoom={6} />

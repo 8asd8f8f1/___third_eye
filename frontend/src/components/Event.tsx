@@ -9,10 +9,13 @@ import {
 import { RiMapPinLine } from "react-icons/ri";
 import { BiUpvote, BiDownvote } from "react-icons/bi";
 import { Link, useLoaderData } from "react-router-dom";
-import Map from "./Map";
+import MapApp, { MyMapComponent } from "./Map";
 import Navbar from "./Navbar";
 import { EventClass, Comment } from "./types";
 import axios from "axios";
+import { Wrapper } from "@googlemaps/react-wrapper";
+
+import { LocationClass } from "./types";
 
 const TitleBar = () => (
     <div className='flex items-center gap-4 w-full pt-5 pb-2 '>
@@ -23,11 +26,21 @@ const TitleBar = () => (
     </div>
 );
 
-const MapDiv = () => (
-    <div className='h-[450px] w-full grid-center bg-slate-200  rounded-xl'>
-        MAP
-    </div>
-);
+const MapDiv: React.FC<{ location: LocationClass; zoom: number }> = ({
+    location,
+    zoom,
+}) => {
+    return (
+        <div className='w-full grid-center bg-slate-200  rounded-xl'>
+            <Wrapper apiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}>
+                <MyMapComponent
+                    center={{ lat: location.lat, lng: location.lng }}
+                    zoom={zoom}
+                />
+            </Wrapper>
+        </div>
+    );
+};
 
 const EventInfo: React.FC<{ event: EventClass }> = ({ event }) => {
     const [EventIntensity, setEventIntensity] = React.useState("High");
@@ -102,6 +115,7 @@ const EventComment: React.FC<{ data: Comment }> = ({ data }) => {
         </div>
     );
 };
+
 const EventComments: React.FC = () => {
     return (
         <div className='bg-slate-100 rounded-[12px] p-5 w-full'>
@@ -160,10 +174,13 @@ const EventComments: React.FC = () => {
 const Event: React.FC = () => {
     const event = useLoaderData() as EventClass;
     return (
-        <div className='h-screen w-[450px] sm:w-[600px] m-auto flex flex-col gap-5 items-center'>
+        <div className='h-screen w-[450px] sm:w-[600px] md:w-[1000px] m-auto flex flex-col gap-5 items-center'>
             <Navbar />
             <TitleBar />
-            <Map />
+            <MapDiv
+                location={{ lat: event.Latitude, lng: event.Longitude }}
+                zoom={15}
+            />
             <EventInfo event={event} />
             <EventComments />
         </div>

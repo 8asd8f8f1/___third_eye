@@ -2,6 +2,7 @@ import React, { ReactElement, useState } from "react";
 import Map from "./components/HMap";
 import Events from "./components/Events";
 
+import Login from "./components/Login";
 import MapApp from "./components/Map";
 import Event, { GetEventByID } from "./components/Event";
 
@@ -20,6 +21,10 @@ const router = createBrowserRouter([
     {
         path: "/events",
         element: <Events />,
+    },
+    {
+        path: "/login",
+        element: <Login />,
     },
 ]);
 
