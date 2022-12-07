@@ -58,7 +58,7 @@ create table UserEvent
 	ID int primary key auto_increment,
     UserID int,
     Date_time datetime  DEFAULT CURRENT_TIMESTAMP,
-    EventStatus varchar(50) not null,
+    EventStatus varchar(50) not null default "Open",
     Severity varchar(50),
     EventDescription longtext,
     Category varchar(50) not null,
@@ -79,27 +79,7 @@ create table UserEvent
 -- desc UserEvent;
 -- select * from userEvent;
 -- Crime
-update UserEvent set Latitude=12.901225, Longitude=77.5786533 where userid=1 and id=1;
-update UserEvent set Latitude=26.347695, Longitude=86.078966 where userid=2 and id=2;
-update UserEvent set Latitude=17.4122998, Longitude=78.2679574 where userid=3 and id=3;
-update UserEvent set Latitude=22.835625, Longitude=75.589448 where userid=4 and id=4;
-update UserEvent set Latitude=30.698648, Longitude=76.835469 where userid=5 and id=5;
-update UserEvent set Latitude=18.5248904, Longitude=73.7228796 where userid=1 and id=6;
-update UserEvent set Latitude=28.9138175, Longitude=78.439467 where userid=2 and id=7;
-update UserEvent set Latitude=28.058933, Longitude=76.532035 where userid=3 and id=8;
-update UserEvent set Latitude=28.616818, Longitude=77.167628 where userid=4 and id=9;
-update UserEvent set Latitude=19.7540881, Longitude=71.9231165 where userid=2 and id=10;
-update UserEvent set Latitude=28.3393409, Longitude=77.3084253 where userid=5 and id=11;
-update UserEvent set Latitude=8.88726, Longitude=76.6032933 where userid=2 and id=12;
-update UserEvent set Latitude=28.4684629, Longitude=77.1279273 where userid=3 and id=13;
-update UserEvent set Latitude=28.378368, Longitude=77.8222583 where userid=2 and id=14;
-update UserEvent set Latitude=28.564884,  Longitude=77.241317 where userid=1 and id=15;
-update UserEvent set Latitude=28.616818, Longitude=77.167628 where userid=1 and id=16;
-update UserEvent set Latitude=23.019550, Longitude=72.546772 where userid=3 and id=17;
-update UserEvent set Latitude=12.884071, Longitude=77.187138 where userid=5 and id=18;
-update UserEvent set Latitude=12.396742, Longitude=79.537877 where userid=1 and id=19;
-update UserEvent set Latitude=13.117072, Longitude=77.536131 where userid=1 and id=20;
-update UserEvent set Latitude=12.884071, Longitude=12.904324 where userid=5 and id=21;
+
 
 /*
 update UserEvent set Latitude=12.396742, Longitude=79.537877 where userid=1 and id=1;
@@ -402,57 +382,24 @@ if you find it anywhere in the neighbourhood please give it to the local authori
 
 
 
--- select * from UserEvent;
-
--- select userid,id,eventdescription from UserEvent where category="Missing Items";
-
--- alter table UserEvent modify Date_time datetime DEFAULT CURRENT_TIMESTAMP;
--- alter table UserEvent drop priority;
--- desc userevent;
-/*
-create table Location
-(
-	ID int primary key auto_increment,
-    Latitude point not null,
-    Longitude point not null
-);
-
-CREATE TABLE LocationMapping (
-    LocationID INT,
-    EventID INT,
-    UserID INT,
-    CONSTRAINT UserEvent_LocationMapping_FK FOREIGN KEY (EventID)
-        REFERENCES UserEvent (ID),
-    CONSTRAINT Location_LocationMapping_FK FOREIGN KEY (LocationID)
-        REFERENCES Location (ID)
-);
-
--- alter table locationmapping drop constraint Users_LocationMapping_FK;
-
--- show tables;
-
-create table Images
-(	
-	ID int primary key auto_increment,
-    ImageName varchar(255) unique not null,
-    Filepath text not null
-);
-
-create table ImageMapping
-(
-	ImageID int ,
-    EventID int,
-    CONSTRAINT UserEvent_ImageMapping_FK FOREIGN  KEY (EventID) REFERENCES UserEvent(ID),
-    CONSTRAINT Images_ImageMapping_FK FOREIGN  KEY (ImageID) REFERENCES Images(ID)
-);
-*/
-
--- select * from users;
--- select * from address;
-
-
-
-
-
-
-
+update UserEvent set Latitude=12.901225, Longitude=77.5786533 where userid=1 and id=1;
+update UserEvent set Latitude=26.347695, Longitude=86.078966 where userid=2 and id=2;
+update UserEvent set Latitude=17.4122998, Longitude=78.2679574 where userid=3 and id=3;
+update UserEvent set Latitude=22.835625, Longitude=75.589448 where userid=4 and id=4;
+update UserEvent set Latitude=30.698648, Longitude=76.835469 where userid=5 and id=5;
+update UserEvent set Latitude=18.5248904, Longitude=73.7228796 where userid=1 and id=6;
+update UserEvent set Latitude=28.9138175, Longitude=78.439467 where userid=2 and id=7;
+update UserEvent set Latitude=28.058933, Longitude=76.532035 where userid=3 and id=8;
+update UserEvent set Latitude=28.616818, Longitude=77.167628 where userid=4 and id=9;
+update UserEvent set Latitude=19.7540881, Longitude=71.9231165 where userid=2 and id=10;
+update UserEvent set Latitude=28.3393409, Longitude=77.3084253 where userid=5 and id=11;
+update UserEvent set Latitude=8.88726, Longitude=76.6032933 where userid=2 and id=12;
+update UserEvent set Latitude=28.4684629, Longitude=77.1279273 where userid=3 and id=13;
+update UserEvent set Latitude=28.378368, Longitude=77.8222583 where userid=2 and id=14;
+update UserEvent set Latitude=28.564884,  Longitude=77.241317 where userid=1 and id=15;
+update UserEvent set Latitude=28.616818, Longitude=77.167628 where userid=1 and id=16;
+update UserEvent set Latitude=23.019550, Longitude=72.546772 where userid=3 and id=17;
+update UserEvent set Latitude=12.884071, Longitude=77.187138 where userid=5 and id=18;
+update UserEvent set Latitude=12.396742, Longitude=79.537877 where userid=1 and id=19;
+update UserEvent set Latitude=13.117072, Longitude=77.536131 where userid=1 and id=20;
+update UserEvent set Latitude=12.884071, Longitude=12.904324 where userid=5 and id=21;

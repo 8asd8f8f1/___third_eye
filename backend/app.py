@@ -1,16 +1,19 @@
 from flask import Flask, render_template, flash, redirect, url_for, session, request, logging, jsonify, make_response
 from flask_mysqldb import MySQL
 from functools import wraps
-from flask_cors import CORS
+from flask_cors import CORS, cross_origin
 from datetime import datetime, date
 from flask.json import JSONEncoder
 import jwt
+import decimal
 
 class CustomJSONEncoder(JSONEncoder):
     def default(self, obj):
         try:
             if isinstance(obj, date):
                 return obj.isoformat()
+            elif isinstance(obj, decimal.Decimal):
+                return float(obj)
             iterable = iter(obj)
         except TypeError:
             pass
@@ -26,16 +29,18 @@ CORS(app)
 # Config MySQL
 app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = ''
+app.config['MYSQL_PASSWORD'] = 'password'
 app.config['MYSQL_DB'] = 'thirdEyeDB'
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 # init MYSQL
 mysql = MySQL(app)
 
 
+# @cross_origin()
 @app.route('/')
 # User login
 @app.route('/login', methods=['POST'])
+@cross_origin(origin="*", headers=["Content-Type", "Access-Control-Allow-Origin"])
 def login():
     if request.method == 'POST':
         # Get Form Fields
@@ -48,7 +53,7 @@ def login():
         cur = mysql.connection.cursor()
 
         # Get user by username
-        result = cur.execute("SELECT * FROM users WHERE email = %s", [email])
+        result = cur.execute("SELECT * FROM Users WHERE email = %s", [email])
         if result > 0:
             # Get stored hash
             data = cur.fetchone()
@@ -83,7 +88,6 @@ def login():
 
 
 @app.route('/events')
-@app.route('/events')
 def showAllEvents():
     cur = mysql.connection.cursor()
 
@@ -93,7 +97,7 @@ def showAllEvents():
     # Commit to DB
     mysql.connection.commit()
 
-    print(result)
+    # print(result)
 
     # Close connection
     cur.close()
@@ -126,11 +130,11 @@ def showEventByLocation():
         # Execute query
 
         statement = f'''
-        select * from 
+        SELECT * FROM 
         UserEvent where 
-        Latitude between '{lat-0.5}' and '{lat+0.5}' 
+        Latitude BETWEEN '{lat-0.5}' AND '{lat+0.5}' 
         and 
-        Longitude between '{long-0.5}' and '{long+0.5}'
+        Longitude BETWEEN '{long-0.5}' AND '{long+0.5}'
         '''
 
         cur.execute(statement)
@@ -223,11 +227,16 @@ def addevent():
         category = request_json['category']
         title = request_json['title']
         etime = request_json['etime']
+        lat = request_json['lat']
+        lng = request_json['lng']
 
         # Create cursor
         cur = mysql.connection.cursor()
 
-        cur.execute("INSERT INTO UserEvent(userid, severity, eventdescription, category, title, Event_time) VALUES(%s, %s, %s, %s, %s, %s)", (session['userid'], severity, desc, category, title, etime))
+        # cur.execute("INSERT INTO UserEvent(userid, severity, eventdescription, category, title, Event_time) VALUES(%s, %s, %s, %s, %s, %s)", (session['userid'], severity, desc, category, title, etime))
+
+        cur.execute("INSERT INTO UserEvent(userid, severity, eventdescription, category, title, Event_time, Latitude, Longitude) VALUES(%s, %s, %s, %s, %s, %s, %s, %s)", (1, severity, desc, category, title, etime, lat, lng))
+
         # Commit to DB
         mysql.connection.commit()
 
