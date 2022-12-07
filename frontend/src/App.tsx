@@ -5,7 +5,7 @@ import Map from "./components/HMap";
 import Events from "./components/Events";
 
 import MapApp from "./components/Map";
-import Event from "./components/Event";
+import Event, { GetEventByID } from "./components/Event";
 
 import { createBrowserRouter, RouterProvider, Route } from "react-router-dom";
 
@@ -17,6 +17,7 @@ const router = createBrowserRouter([
     {
         path: "/event/:EventID",
         element: <Event />,
+        loader: GetEventByID,
     },
     {
         path: "/events",

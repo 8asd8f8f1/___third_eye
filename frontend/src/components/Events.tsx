@@ -1,7 +1,5 @@
 import React from "react";
-
 import { Link } from "react-router-dom";
-
 import {
     FaArrowLeft,
     FaMapMarkerAlt,
@@ -9,17 +7,16 @@ import {
     FaArrowDown,
     FaArrowUp,
 } from "react-icons/fa";
-
 import {
     useQuery,
     QueryClient,
     QueryClientProvider,
     useQueryClient,
 } from "@tanstack/react-query";
-
 import axios from "axios";
-
 import Navbar from "./Navbar";
+
+import { EventClass } from "./types";
 
 const queryClient = new QueryClient();
 
@@ -31,23 +28,23 @@ const Events: React.FC = () => {
     );
 };
 
-class Event {
-    Category: string = "";
-    Date_time: Date = new Date();
-    Downvote: number = 0;
-    EventDescription: string = "";
-    EventStatus: string = "";
-    Event_time: Date = new Date();
-    ID: number = 0;
-    Severity: string = "";
-    Title: string = "";
-    Upvote: number = 0;
-    UserID: number = 0;
-    UserName: string = "";
-    isVerified: number = 0;
-}
+// class Event {
+//     Category: string = "";
+//     Date_time: Date = new Date();
+//     Downvote: number = 0;
+//     EventDescription: string = "";
+//     EventStatus: string = "";
+//     Event_time: Date = new Date();
+//     ID: number = 0;
+//     Severity: string = "";
+//     Title: string = "";
+//     Upvote: number = 0;
+//     UserID: number = 0;
+//     UserName: string = "";
+//     isVerified: number = 0;
+// }
 
-const EventComponent: React.FC<{ event: Event }> = ({ event }) => {
+const EventComponent: React.FC<{ event: EventClass }> = ({ event }) => {
     return (
         <div className='flex flex-col border-[1px] border-gray-500 rounded-xl p-4 w-[50%]'>
             <div className='flex flex-row items-center'>
@@ -74,14 +71,13 @@ const EventComponent: React.FC<{ event: Event }> = ({ event }) => {
             <p className='text-sm'>{event.EventDescription}</p>
             <div className='flex items-center mt-2'>
                 <p className='text-sm font-semibold text-gray-500'>
-                    {`${event.UserName} on ${new Date().toLocaleString(
-                        "en-IN",
-                        {
-                            day: "2-digit",
-                            month: "short",
-                            year: "2-digit",
-                        }
-                    )}`}
+                    {`${event.UserName} on ${new Date(
+                        event.Date_time
+                    ).toLocaleString("en-IN", {
+                        day: "2-digit",
+                        month: "short",
+                        year: "2-digit",
+                    })}`}
                 </p>
             </div>
             <div className='flex items-center gap-3 mt-2'>
@@ -110,7 +106,7 @@ const EventsComponent: React.FC = () => {
         queryFn: () =>
             axios
                 .get(`${import.meta.env.VITE_FLASK_BACKEND}/events`)
-                .then(res => res.data as [Event]),
+                .then(res => res.data),
     });
 
     return (

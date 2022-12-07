@@ -150,8 +150,8 @@ const Map: React.FC<MapProps> = ({
         if (ref.current && !map) {
             setMap(
                 new window.google.maps.Map(ref.current, {
-                    center: { lat: -34.397, lng: 150.644 },
-                    zoom: 8,
+                    center: { lat: 22.1224463, lng: 81.3628706 },
+                    zoom: 6,
                 })
             );
         }

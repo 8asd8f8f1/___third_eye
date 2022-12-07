@@ -10,7 +10,7 @@ const Map: React.FC = () => {
     const mapOptions = {
         // Add your map options here
         // `center` and `zoom` are required for every map to be displayed
-        center: { lat: 53.5582447, lng: 9.647645 },
+        center: { lat: 22.1224463, lng: 81.3628706 },
         zoom: 6,
     };
 
