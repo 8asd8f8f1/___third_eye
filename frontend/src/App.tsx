@@ -5,8 +5,9 @@ import Events from "./components/Events";
 import Login from "./components/Login";
 import MapApp from "./components/Map";
 import Event, { GetEventByID } from "./components/Event";
-
+import Register from "./components/Register";
 import { createBrowserRouter, RouterProvider, Route } from "react-router-dom";
+import CreateEvent from "./components/CreateEvent";
 
 const router = createBrowserRouter([
     {
@@ -25,6 +26,14 @@ const router = createBrowserRouter([
     {
         path: "/login",
         element: <Login />,
+    },
+    {
+        path: "/register",
+        element: <Register />,
+    },
+    {
+        path: "/addevent",
+        element: <CreateEvent />,
     },
 ]);
 

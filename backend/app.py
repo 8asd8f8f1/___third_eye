@@ -40,7 +40,6 @@ mysql = MySQL(app)
 @app.route('/')
 # User login
 @app.route('/login', methods=['POST'])
-@cross_origin(origin="*", headers=["Content-Type", "Access-Control-Allow-Origin"])
 def login():
     if request.method == 'POST':
         # Get Form Fields
@@ -217,7 +216,6 @@ def is_logged_in(f):
     return wrap
 
 @app.route('/addevent',methods=['POST'])
-@is_logged_in
 def addevent():
     if request.method == 'POST':
         request_json = request.get_json()
@@ -246,7 +244,6 @@ def addevent():
         return make_response(jsonify(data), 201)
 
 @app.route('/upvoteById/<int:id>')
-@is_logged_in
 def upvoteById(id):
     cur = mysql.connection.cursor()
 
@@ -262,7 +259,6 @@ def upvoteById(id):
     return make_response(jsonify(result),200)
 
 @app.route('/downvoteById/<int:id>')
-@is_logged_in
 def downvoteById(id):
     cur = mysql.connection.cursor()
 
@@ -279,7 +275,6 @@ def downvoteById(id):
 
 
 @app.route('/editEvent',methods=['POST'])
-@is_logged_in
 def editEvent():
     if request.method == 'POST':
         request_json = request.get_json()
@@ -293,39 +288,37 @@ def editEvent():
         title = request_json['title']
         etime = request_json['etime']
 
-        if uid == session['userid']:
-            try:
-                cur = mysql.connection.cursor()
 
-                # Execute query
-                statement = f'''
-                            update UserEvent set Title = '{title}', EventDescription = '{desc}', 
-                            Category = '{category}', Severity = '{severity}', EventStatus = '{status}',
-                            Event_time = '{etime}' where ID = {id} and UserID = {uid};
-                            '''
+        try:
+            cur = mysql.connection.cursor()
 
-                cur.execute(statement)
+            # Execute query
+            statement = f'''
+                        update UserEvent set Title = '{title}', EventDescription = '{desc}', 
+                        Category = '{category}', Severity = '{severity}', EventStatus = '{status}',
+                        Event_time = '{etime}' where ID = {id} and UserID = {uid};
+                        '''
 
-                # Commit to DB
-                mysql.connection.commit()
+            cur.execute(statement)
 
-                if cur.rowcount:
-                    # Close connection
-                    cur.close()
-                    result = {'message':'Success'}
-                    return make_response(jsonify(result),200)
-                else:
-                    cur.close()
-                    result = {'message':'Sorry! You are not allowed to update this event.1'}
-                    return make_response(jsonify(result),401)
-                
-            except Exception as e:
-                result = {'message':'Failed'}
+            # Commit to DB
+            mysql.connection.commit()
+
+            if cur.rowcount:
+                # Close connection
+                cur.close()
+                result = {'message':'Success'}
+                return make_response(jsonify(result),200)
+            else:
+                cur.close()
+                result = {'message':'Sorry! You are not allowed to update this event.1'}
                 return make_response(jsonify(result),401)
-
-        else:
-            result = {'message':'Sorry! You are not allowed to update this event.'}
+            
+        except Exception as e:
+            result = {'message':'Failed'}
             return make_response(jsonify(result),401)
+
+
 
 
 
@@ -333,7 +326,6 @@ def editEvent():
 
 # Logout
 @app.route('/logout')
-@is_logged_in
 def logout():
     session.clear()
     data = { 'message': 'You are now logged out'}

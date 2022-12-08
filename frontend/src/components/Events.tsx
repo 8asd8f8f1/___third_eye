@@ -96,9 +96,7 @@ const EventComponent: React.FC<{ event: EventClass }> = ({ event }) => {
                 <EventCategory category={event.Category} />
                 <EventSeverity severity={event.Severity} />
             </div>
-            {/* <p className='text-sm text-ellipsis overflow-x-hidden overflow-y-hidden min-h-[30px] max-h-[80px] align-top'>
-                {event.EventDescription.slice(0, 100)}...
-            </p> */}
+            {/* <p className='text-sm text-ellipsis overflow-x-hidden overflow-y-hidden min-h-[30px] max-h-[80px] align-top'> {event.EventDescription.slice(0, 100)}...  </p> */}
             <EventUserTS username={event.UserName} datetime={event.Date_time} />
             <div className='flex items-center gap-3 mt-2'>
                 <div className='flex items-center gap-1'>
@@ -126,19 +124,58 @@ const EventsComponent: React.FC = () => {
         queryFn: () =>
             axios
                 .get(`${import.meta.env.VITE_FLASK_BACKEND}/events`)
-                .then(res => res.data as [EventClass]),
+                .then(res => {
+                    setEvents(res.data);
+                    return res.data;
+                }),
     });
+
+    const [Events, setEvents] = React.useState<EventClass[]>();
+
+    const Filters = [
+        "Accident",
+        "Locality Issue",
+        "Transport",
+        "Missing Items",
+        "Crime",
+    ];
+    const [FilterType, setFilterType] = React.useState("");
+
+    // const Filter: React.FC = () => (
+    //     <div className='flex gap-2'>
+    //         {Filters.map((f, idx) => (
+    //             <div className='text-xs font-semibold text-blue-600 border-blue-600 border-[1px] px-2 rounded-full'>
+    //                 {f}
+    //             </div>
+    //         ))}
+    //     </div>
+    // );
 
     return (
         <div className='m-auto flex flex-col gap-5 w-[400px] sm:w-[500px] lg:w-[80%] xl:w-[60%] items-center'>
             <Navbar />
+            <div className='flex gap-2'>
+                {Filters.map((f, idx) => (
+                    <div
+                        className='text-xs font-semibold text-blue-600 border-blue-600 border-[1px] px-2 rounded-full'
+                        onClick={() => setFilterType(f)}
+                        key={idx}
+                    >
+                        {f}
+                    </div>
+                ))}
+            </div>
             {eventsQuery.isError
                 ? "Error!!!"
                 : eventsQuery.isLoading
                 ? "Loading..."
-                : eventsQuery.data.map((e, idx) => (
-                      <EventComponent key={idx} event={e} />
-                  ))}
+                : Events?.map((e, idx) => {
+                      if (FilterType !== "") {
+                          if (e.Category === FilterType) {
+                              return <EventComponent key={idx} event={e} />;
+                          }
+                      }
+                  })}
         </div>
     );
 };
