@@ -2,6 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  background: linear-gradient(
+    90deg,
+    rgba(7, 3, 66, 1) 0%,
+    rgba(9, 9, 121, 1) 57%
+  );
+}
 /*
 :root {
     font-family: "Inter", "Avenir", "Helvetica", "Arial", sans-serif;
@@ -77,9 +84,9 @@ button:focus-visible {
 } */
 
 * {
-    font-family: Inter;
+  font-family: Inter;
 }
 
 .grid-center {
-    @apply grid place-items-center;
+  @apply grid place-items-center;
 }
